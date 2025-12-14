@@ -1,0 +1,40 @@
+# ------------------------------------
+# 1. STREAMLIT SECRETS (CRITICAL)
+# ------------------------------------
+# IGNORE the directory containing secrets
+.streamlit/secrets.toml
+# Optionally ignore the entire local config folder if nothing else is needed:
+# .streamlit/
+
+# ------------------------------------
+# 2. PYTHON ENVIRONMENT
+# ------------------------------------
+# Virtual environment folder
+venv/
+.venv/
+__pycache__/
+
+# ------------------------------------
+# 3. OPERATING SYSTEM & EDITOR FILES
+# ------------------------------------
+# macOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+
+# IDE files (e.g., VS Code)
+.vscode/
+
+# ------------------------------------
+# 4. PYTHON/STREAMLIT CACHE
+# ------------------------------------
+# Streamlit cache files
+.streamlit/cache/
+
+# LlamaIndex/Other cache files (if any are created)
+.llama_index/
+
+# Logs and runtime files
+*.log
+tempfile*

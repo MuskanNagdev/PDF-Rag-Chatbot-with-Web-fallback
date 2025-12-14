@@ -1,0 +1,21 @@
+# Core Streamlit application framework
+streamlit
+
+# Groq client for low-latency LLM calls
+groq
+
+# LlamaIndex (Core components for memory management and parsing)
+llama-index-core
+
+# Sentence-Transformers for generating embeddings (EMBED_MODEL_NAME)
+sentence-transformers
+
+# FAISS for high-performance vector indexing and similarity search
+faiss-cpu
+
+# Google client library for Custom Search API (Web Fallback)
+google-api-python-client
+
+# Other utilities
+numpy
+pypdf # For handling PDF documents in SimpleDirectoryReader
