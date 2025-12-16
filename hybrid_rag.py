@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import pypdf
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -9,6 +10,7 @@ from llama_index.core import SimpleDirectoryReader
 # Corrected imports for ChatMessage and ChatMemoryBuffer
 from llama_index.core.llms import ChatMessage, MessageRole # MessageRole is typically under core.llms
 from llama_index.core.memory import ChatMemoryBuffer 
+from llama_index.core import Document
 # --------------------------
 
 from groq import Groq
@@ -42,11 +44,21 @@ def load_embedding_model():
 embed_model = load_embedding_model()
 
 
-def load_single_pdf(path):
-    """Loads a single PDF document."""
-    reader = SimpleDirectoryReader(input_files=[path])
-    docs = reader.load_data()
-    return docs
+def load_single_pdf(uploaded_file):
+    """Manually reads PDF from memory to avoid temp file issues on Cloud."""
+    # 1. Reset the file pointer to the start
+    uploaded_file.seek(0)
+    
+    # 2. Extract text using pypdf
+    pdf_reader = pypdf.PdfReader(uploaded_file)
+    text = ""
+    for page in pdf_reader.pages:
+        extracted = page.extract_text()
+        if extracted:
+            text += extracted + "\n"
+    
+    # 3. Return as a LlamaIndex Document list
+    return [Document(text=text, metadata={"file_name": uploaded_file.name})]
 
 
 @st.cache_data(show_spinner="Splitting document into chunks...")
@@ -398,7 +410,7 @@ def generate_answer(query, chunks):
         model="llama-3.1-8b-instant",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
-        max_tokens=500,
+        max_tokens=5000,
         stream=True
     )
 
@@ -458,13 +470,13 @@ uploaded_file = st.file_uploader("📤 Upload PDF", type=["pdf"])
 if uploaded_file:
     st.success("PDF uploaded! Processing...")
 
-    pdf_path = None
+    # pdf_path = None
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-            temp_file.write(uploaded_file.read())
-            pdf_path = temp_file.name
+        # with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            # temp_file.write(uploaded_file.read())
+            # pdf_path = temp_file.name
 
-        docs = load_single_pdf(pdf_path)
+        docs = load_single_pdf(uploaded_file)
         texts = chunk_documents(docs)
         index = build_faiss_index(texts)
 
@@ -571,5 +583,4 @@ if uploaded_file:
                     st.session_state.li_memory.put(ChatMessage(role=MessageRole.ASSISTANT, content=final_answer_text))
 
     finally:
-            if pdf_path and os.path.exists(pdf_path):
-                os.unlink(pdf_path)
+            st.write("Processing Complete")
